@@ -12,12 +12,12 @@ class Day7 : Day() {
     override fun part2() = containingBags(createGraph(input()), "shiny gold").toLong()
 }
 
-val rulePattern1 =
+private val rulePattern1 =
     """(\w+ \w+) bags contain (.+)""".toRegex()
-val rulePattern2 =
+private val rulePattern2 =
     """(\d+) (\w+ \w+) bags?(?:, |\.)""".toRegex()
 
-fun createGraph(lines: Sequence<String>): Map<String, Set<Pair<Int, String>>> = lines
+private fun createGraph(lines: Sequence<String>): Map<String, Set<Pair<Int, String>>> = lines
     .map { rulePattern1.matchEntire(it)!! }
     .map { Pair(it.groupValues[1], it.groupValues[2]) }
     .associate { (outer, inner) ->
@@ -28,10 +28,10 @@ fun createGraph(lines: Sequence<String>): Map<String, Set<Pair<Int, String>>> = 
         Pair(outer, containing)
     }
 
-fun simpleGraph(lines: Sequence<String>): Map<String, Set<String>> =
+private fun simpleGraph(lines: Sequence<String>): Map<String, Set<String>> =
     createGraph(lines).asSequence().associate { Pair(it.key, it.value.map { (_, bag) -> bag }.toSet()) }
 
-fun findContainers(graph: Map<String, Set<String>>, bag: String): Set<String> {
+private fun findContainers(graph: Map<String, Set<String>>, bag: String): Set<String> {
     val containers = mutableSetOf<String>()
     val stack = ArrayDeque<String>().apply { addLast(bag) }
 
@@ -48,7 +48,7 @@ fun findContainers(graph: Map<String, Set<String>>, bag: String): Set<String> {
     return containers
 }
 
-fun containingBags(graph: Map<String, Set<Pair<Int, String>>>, bag: String): Int {
+private fun containingBags(graph: Map<String, Set<Pair<Int, String>>>, bag: String): Int {
     var containingBags = 0
     graph[bag]!!.forEach {
         containingBags += (it.first + (it.first * containingBags(graph, it.second)))

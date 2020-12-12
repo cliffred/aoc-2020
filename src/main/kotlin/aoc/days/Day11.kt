@@ -18,7 +18,7 @@ class Day11 : Day() {
         .toLong()
 }
 
-tailrec fun seatArrangement(map: Array<CharArray>, radius: Int, minOccupied: Int): Array<CharArray> {
+private tailrec fun seatArrangement(map: Array<CharArray>, radius: Int, minOccupied: Int): Array<CharArray> {
     fun adjacent(row: Int, col: Int): Int {
         var occupied = 0
         val directions = (-1..1).flatMap { a -> (-1..1).map { b -> Pair(a, b) } }.filterNot { it == Pair(0, 0) }

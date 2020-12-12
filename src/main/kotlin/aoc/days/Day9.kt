@@ -14,7 +14,7 @@ class Day9 : Day() {
     override fun part2() = consecSum(inputList, part1()).let { it.minOrNull()!! + it.maxOrNull()!! }
 }
 
-fun consecSum(nums: List<Long>, target: Long): List<Long> {
+private fun consecSum(nums: List<Long>, target: Long): List<Long> {
     for (i in 0..nums.lastIndex) {
         var j = 1
         while (true) {
@@ -32,7 +32,7 @@ fun consecSum(nums: List<Long>, target: Long): List<Long> {
     throw IllegalStateException("No sum")
 }
 
-fun validate(nums: List<Long>, preamble: Int): Long {
+private fun validate(nums: List<Long>, preamble: Int): Long {
     for (i in preamble..nums.lastIndex) {
         val target = nums[i]
         if (!sumsUpTo(nums.slice(i - preamble until i), target)) {
@@ -42,7 +42,7 @@ fun validate(nums: List<Long>, preamble: Int): Long {
     throw IllegalStateException("All is valid")
 }
 
-fun sumsUpTo(nums: Iterable<Long>, target: Long): Boolean {
+private fun sumsUpTo(nums: Iterable<Long>, target: Long): Boolean {
     val numsSeen = mutableSetOf<Long>()
     nums.forEach {
         val complement = target - it

@@ -14,7 +14,7 @@ class Day8 : Day() {
     override fun part2() = findCorruptInstr(inputList).acc.toLong()
 }
 
-fun exec(instructions: List<Instr>): ExecResult {
+private fun exec(instructions: List<Instr>): ExecResult {
     val visited = mutableSetOf<Int>()
     var acc = 0
     var instrIndex = 0
@@ -26,7 +26,7 @@ fun exec(instructions: List<Instr>): ExecResult {
     return if (instrIndex == instructions.size) Success(acc) else Failure(acc, instrIndex)
 }
 
-fun parseInstr(input: String): Instr {
+private fun parseInstr(input: String): Instr {
     val instr = input.substring(0, 3)
     val value = input.substring(4).toInt()
 
@@ -60,34 +60,34 @@ private fun swap(instr: Instr) = when (instr) {
     is Nop -> Jmp(instr.value)
 }
 
-sealed class ExecResult(val acc: Int)
+private sealed class ExecResult(val acc: Int)
 
-class Success(acc: Int) : ExecResult(acc) {
+private class Success(acc: Int) : ExecResult(acc) {
     override fun toString() = "SUCCESS acc: $acc"
 }
 
-class Failure(acc: Int, private val loopInstr: Int) : ExecResult(acc) {
+private class Failure(acc: Int, private val loopInstr: Int) : ExecResult(acc) {
     override fun toString() = "FAIL acc: $acc loopAt: $loopInstr"
 }
 
-sealed class Instr {
+private sealed class Instr {
     abstract fun acc(): Int
     abstract fun next(): Int
 }
 
-class Acc(private val value: Int) : Instr() {
+private class Acc(private val value: Int) : Instr() {
     override fun acc() = value
     override fun next() = 1
     override fun toString() = "acc $value"
 }
 
-class Jmp(val value: Int) : Instr() {
+private class Jmp(val value: Int) : Instr() {
     override fun acc() = 0
     override fun next() = value
     override fun toString() = "jpm $value"
 }
 
-class Nop(val value: Int) : Instr() {
+private class Nop(val value: Int) : Instr() {
     override fun acc() = 0
     override fun next() = 1
     override fun toString() = "nop $value"

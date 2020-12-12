@@ -17,7 +17,7 @@ class Day3 : Day() {
         .reduce { a, b -> a * b }
 }
 
-fun countTrees(map: List<String>, startX: Int, startY: Int, right: Int, down: Int): Int {
+private fun countTrees(map: List<String>, startX: Int, startY: Int, right: Int, down: Int): Int {
     val width = map.first().length
     var trees = 0
     var x = startX

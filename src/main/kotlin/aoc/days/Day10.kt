@@ -16,13 +16,13 @@ class Day10 : Day() {
     override fun part2() = countArrangements(chain(inputList))
 }
 
-fun chain(adapters: List<Int>) = adapters.toMutableList().apply {
+private fun chain(adapters: List<Int>) = adapters.toMutableList().apply {
     sort()
     add(0, 0)
     add(last() + 3)
 }
 
-fun countArrangements(nums: List<Int>): Long {
+private fun countArrangements(nums: List<Int>): Long {
     val cache = hashMapOf<List<Int>, Long>()
     fun mem(nums: List<Int>): Long {
         cache[nums]?.let { return it }

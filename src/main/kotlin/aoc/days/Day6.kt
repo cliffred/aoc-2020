@@ -12,7 +12,7 @@ class Day6 : Day() {
     override fun part2() = answers2(input()).map { it.size }.sum().toLong()
 }
 
-fun answers1(lines: Sequence<String>): List<Set<Char>> {
+private fun answers1(lines: Sequence<String>): List<Set<Char>> {
     val answerPerGroup = mutableListOf<Set<Char>>()
     var answers = mutableSetOf<Char>()
     lines.forEach { line ->
@@ -30,7 +30,7 @@ fun answers1(lines: Sequence<String>): List<Set<Char>> {
     return answerPerGroup
 }
 
-fun answers2(lines: Sequence<String>): List<Set<Char>> {
+private fun answers2(lines: Sequence<String>): List<Set<Char>> {
     val answerPerGroup = mutableListOf<Set<Char>>()
     var answers = mutableSetOf<Char>()
     var newGroup = true

@@ -14,7 +14,7 @@ class Day1 : Day() {
     override fun part2() = threeSumMultiply(inputList, 2020).toLong()
 }
 
-fun twoSumMultiply(nums: List<Int>, target: Int): Int {
+private fun twoSumMultiply(nums: List<Int>, target: Int): Int {
     val numsSeen = mutableSetOf<Int>()
     nums.forEach {
         val complement = target - it
@@ -26,7 +26,7 @@ fun twoSumMultiply(nums: List<Int>, target: Int): Int {
     throw IllegalArgumentException()
 }
 
-fun threeSumMultiply(nums: List<Int>, target: Int): Int {
+private fun threeSumMultiply(nums: List<Int>, target: Int): Int {
     val dubbleSum = mutableMapOf<Int, Set<Int>>()
 
     for (i in nums.indices) {

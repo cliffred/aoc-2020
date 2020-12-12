@@ -17,13 +17,13 @@ class Day5 : Day() {
     override fun part2() = (0 until seats).first { it !in boardingPasses && it - 1 in boardingPasses }.toLong()
 }
 
-fun seatId(seats: String): Int {
+private fun seatId(seats: String): Int {
     val row = number(seats.toCharArray(0, 7), 'F', 'B')
     val column = number(seats.toCharArray(7, 10), 'L', 'R')
     return row * 8 + column
 }
 
-fun number(chars: CharArray, lower: Char, higher: Char): Int {
+private fun number(chars: CharArray, lower: Char, higher: Char): Int {
     var low = 0
     var high = 2f.pow(chars.size).toInt() - 1
     chars.forEach { c ->
