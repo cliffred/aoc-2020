@@ -12,77 +12,92 @@ fun main() {
 }
 
 class Day12 : Day() {
-    private val instructions = input().map { Instruction.parse(it) }
+    private val instructions1 = input().map { parseShipInstruction(it) }
+    private val instructions2 = input().map { parseWaypointInstruction(it) }
 
-    override fun part1() = instructions
-        .fold(Position(EAST, 0, 0)) { p, i -> i.move(p) }
-        .let { abs(it.ewPos) + abs(it.nsPos) }
+    override fun part1() = instructions1
+        .fold(Vector(EAST, 0, 0)) { p, i -> i.move(p) }
+        .let { abs(it.x) + abs(it.y) }
         .toLong()
 
-    override fun part2() = TODO()
+    override fun part2() = instructions2
+        .fold(ShipAndWaypoint(0, 0, 10, 1)) { snw, i -> i.move(snw) }
+        .let { abs(it.shipX) + abs(it.shipY) }
+        .toLong()
 }
 
-sealed class Instruction(val value: Int) {
-    abstract fun move(p: Position): Position
+private fun interface ShipInstruction {
+    fun move(p: Vector): Vector
+}
 
-    companion object {
-        fun parse(instr: String): Instruction {
-            val c = instr.first()
-            val value = instr.drop(1).toInt()
-            return when (c) {
-                'N' -> N(value)
-                'S' -> S(value)
-                'E' -> E(value)
-                'W' -> W(value)
-                'L' -> L(value)
-                'R' -> R(value)
-                'F' -> F(value)
-                else -> throw IllegalStateException()
+private fun parseShipInstruction(instr: String): ShipInstruction {
+    val c = instr.first()
+    val value = instr.drop(1).toInt()
+    return when (c) {
+        'N' -> ShipInstruction { it.copy(y = it.y + value) }
+        'S' -> ShipInstruction { it.copy(y = it.y - value) }
+        'E' -> ShipInstruction { it.copy(x = it.x + value) }
+        'W' -> ShipInstruction { it.copy(x = it.x - value) }
+        'L' -> ShipInstruction { p ->
+            val turns = value / 90
+            var newDirection = p.direction
+            repeat(turns) { newDirection = newDirection.left() }
+            p.copy(direction = newDirection)
+        }
+        'R' -> ShipInstruction { p ->
+            val turns = value / 90
+            var newDirection = p.direction
+            repeat(turns) { newDirection = newDirection.right() }
+            p.copy(direction = newDirection)
+        }
+        'F' -> ShipInstruction { p ->
+            when (p.direction) {
+                NORTH -> p.copy(y = p.y + value)
+                SOUTH -> p.copy(y = p.y - value)
+                EAST -> p.copy(x = p.x + value)
+                WEST -> p.copy(x = p.x - value)
             }
         }
+        else -> throw IllegalStateException()
     }
 }
 
-class N(value: Int) : Instruction(value) {
-    override fun move(p: Position) = p.copy(nsPos = p.nsPos + value)
+private fun interface WaypointInstruction {
+    fun move(shipAndWaypoint: ShipAndWaypoint): ShipAndWaypoint
 }
 
-class S(value: Int) : Instruction(value) {
-    override fun move(p: Position) = p.copy(nsPos = p.nsPos - value)
-}
-
-class E(value: Int) : Instruction(value) {
-    override fun move(p: Position) = p.copy(ewPos = p.ewPos + value)
-}
-
-class W(value: Int) : Instruction(value) {
-    override fun move(p: Position) = p.copy(ewPos = p.ewPos - value)
-}
-
-class L(value: Int) : Instruction(value) {
-    override fun move(p: Position): Position {
-        val turns = value / 90
-        var newDirection = p.direction
-        repeat(turns) { newDirection = newDirection.left() }
-        return p.copy(direction = newDirection)
-    }
-}
-
-class R(value: Int) : Instruction(value) {
-    override fun move(p: Position): Position {
-        val turns = value / 90
-        var newDirection = p.direction
-        repeat(turns) { newDirection = newDirection.right() }
-        return p.copy(direction = newDirection)
-    }
-}
-
-class F(value: Int) : Instruction(value) {
-    override fun move(p: Position) = when (p.direction) {
-        NORTH -> p.copy(nsPos = p.nsPos + value)
-        SOUTH -> p.copy(nsPos = p.nsPos - value)
-        EAST -> p.copy(ewPos = p.ewPos + value)
-        WEST -> p.copy(ewPos = p.ewPos - value)
+private fun parseWaypointInstruction(instr: String): WaypointInstruction {
+    val c = instr.first()
+    val value = instr.drop(1).toInt()
+    return when (c) {
+        'N' -> WaypointInstruction { it.copy(wpY = it.wpY + value) }
+        'S' -> WaypointInstruction { it.copy(wpY = it.wpY - value) }
+        'E' -> WaypointInstruction { it.copy(wpX = it.wpX + value) }
+        'W' -> WaypointInstruction { it.copy(wpX = it.wpX - value) }
+        'R' -> WaypointInstruction {
+            val turns = value / 90
+            var newWpX = it.wpX
+            var newWpY = it.wpY
+            repeat(turns) {
+                val tmpX = newWpX
+                newWpX = newWpY
+                newWpY = -tmpX
+            }
+            it.copy(wpX = newWpX, wpY = newWpY)
+        }
+        'L' -> WaypointInstruction {
+            val turns = value / 90
+            var newWpX = it.wpX
+            var newWpY = it.wpY
+            repeat(turns) {
+                val tmpX = newWpX
+                newWpX = -newWpY
+                newWpY = tmpX
+            }
+            it.copy(wpX = newWpX, wpY = newWpY)
+        }
+        'F' -> WaypointInstruction { it.copy(shipX = it.shipX + it.wpX * value, shipY = it.shipY + it.wpY * value) }
+        else -> throw IllegalStateException()
     }
 }
 
@@ -104,4 +119,5 @@ enum class Direction {
     }
 }
 
-data class Position(val direction: Direction, val ewPos: Int, val nsPos: Int)
+data class Vector(val direction: Direction, val x: Int, val y: Int)
+data class ShipAndWaypoint(val shipX: Int, val shipY: Int, val wpX: Int, val wpY: Int)
