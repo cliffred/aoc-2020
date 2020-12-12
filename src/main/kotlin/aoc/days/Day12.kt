@@ -101,7 +101,7 @@ private fun parseWaypointInstruction(instr: String): WaypointInstruction {
     }
 }
 
-enum class Direction {
+private enum class Direction {
     NORTH, SOUTH, EAST, WEST;
 
     fun left() = when (this) {
@@ -119,5 +119,5 @@ enum class Direction {
     }
 }
 
-data class Vector(val direction: Direction, val x: Int, val y: Int)
-data class ShipAndWaypoint(val shipX: Int, val shipY: Int, val wpX: Int, val wpY: Int)
+private data class Vector(val direction: Direction, val x: Int, val y: Int)
+private data class ShipAndWaypoint(val shipX: Int, val shipY: Int, val wpX: Int, val wpY: Int)
