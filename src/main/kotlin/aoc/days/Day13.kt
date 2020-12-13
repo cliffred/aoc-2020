@@ -35,8 +35,8 @@ class Day13 : Day() {
     }
 }
 
-typealias BusAndTime = Pair<Int, Long>
-typealias BusAndOffset = Pair<Int, Int>
+private typealias BusAndTime = Pair<Int, Long>
+private typealias BusAndOffset = Pair<Int, Int>
 
 private fun findBus(startTime: Long, busIds: Iterable<Int>): BusAndTime =
     busIds.map { id -> Pair(id, (ceil(startTime.toDouble() / id).toLong() * id)) }.minByOrNull { it.second }!!
@@ -44,7 +44,7 @@ private fun findBus(startTime: Long, busIds: Iterable<Int>): BusAndTime =
 private fun findLowestTime(busAndOffsets: List<BusAndOffset>): Long {
     var time = 0L
     var step = 1L
-    for ((bus, offset) in busAndOffsets) {
+    busAndOffsets.forEach { (bus, offset) ->
         while ((time + offset) % bus != 0L) {
             time += step
         }
@@ -52,5 +52,3 @@ private fun findLowestTime(busAndOffsets: List<BusAndOffset>): Long {
     }
     return time
 }
-
-private inline fun Boolean.ifTrue(block: () -> Unit) = if (this) block() else Unit
