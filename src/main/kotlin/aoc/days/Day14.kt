@@ -7,35 +7,43 @@ fun main() {
 }
 
 class Day14 : Day() {
-    private val inputList = input().map { Instruction.from(it) }.toList()
+    private val instructionsV1 = input().map { Instruction.v1(it) }.toList()
+    private val instructionsV2 = input().map { Instruction.v2(it) }.toList()
 
-    override fun part1() = runInstructions(inputList).values.sum()
+    override fun part1() = runInstructions(instructionsV1).values.sum()
 
-    override fun part2() = TODO()
+    override fun part2() = runInstructions(instructionsV2).values.sum()
 }
 
 private fun runInstructions(instructions: Iterable<Instruction>): HashMap<Long, Long> {
     val memory = hashMapOf<Long, Long>()
-    var mask = Instruction.Mask.EMPTY
+    var mask: Instruction.Mask? = null
 
     for (i in instructions) {
         when (i) {
             is Instruction.Mask -> mask = i
-            is Instruction.Assignment -> memory[i.location] = mask.applyMask(i.value)
+            is Instruction.Assignment -> mask!!.applyMask(i).forEach { memory[it.location] = it.value }
         }
     }
     return memory
 }
 
 private sealed class Instruction {
-    class Mask(mask: String) : Instruction() {
+
+    abstract class Mask : Instruction() {
+        abstract fun applyMask(assignment: Assignment): List<Assignment>
+    }
+
+    class MaskV1(mask: String) : Mask() {
         private val andMask = mask.replace('X', '1').toLong(2)
         private val orMask = mask.replace('X', '0').toLong(2)
+        override fun applyMask(assignment: Assignment) =
+            listOf(Assignment(assignment.location, assignment.value and andMask or orMask))
+    }
 
-        fun applyMask(i: Long) = i and andMask or orMask
-
-        companion object {
-            val EMPTY = Mask("X".repeat(36))
+    class MaskV2(mask: String) : Mask() {
+        override fun applyMask(assignment: Assignment): List<Assignment> {
+            TODO("Not yet implemented")
         }
     }
 
@@ -45,7 +53,10 @@ private sealed class Instruction {
         private val memPattern =
             """mem\[(\d+)] = (\d+)""".toRegex()
 
-        fun from(instr: String) = if (instr.startsWith("mask")) Mask(instr.drop(7))
-        else memPattern.matchEntire(instr)!!.groupValues.let { (_, l, v) -> Assignment(l.toLong(), v.toLong()) }
+        fun v1(instr: String) = if (instr.startsWith("mask")) MaskV1(instr.drop(7)) else parseAssignment(instr)
+        fun v2(instr: String) = if (instr.startsWith("mask")) MaskV2(instr.drop(7)) else parseAssignment(instr)
+
+        private fun parseAssignment(instr: String) =
+            memPattern.matchEntire(instr)!!.groupValues.let { (_, l, v) -> Assignment(l.toLong(), v.toLong()) }
     }
 }
