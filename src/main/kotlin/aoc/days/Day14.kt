@@ -42,8 +42,16 @@ private sealed class Instruction {
     }
 
     class MaskV2(mask: String) : Mask() {
+        private val baseMask = mask.replace('X', '0').toLong(2)
+        private val floaters = mask.mapIndexedNotNull { i, c -> if (c == 'X') i else null }
+
         override fun applyMask(assignment: Assignment): List<Assignment> {
-            TODO("Not yet implemented")
+            val base = (assignment.location or baseMask).toString(2).padStart(36, '0')
+            return bitCombos(floaters.size).map { bits ->
+                val baseArray = base.toCharArray()
+                floaters.forEachIndexed { i, f -> baseArray[f] = bits[i] }
+                Assignment(String(baseArray).toLong(2), assignment.value)
+            }
         }
     }
 
@@ -60,3 +68,5 @@ private sealed class Instruction {
             memPattern.matchEntire(instr)!!.groupValues.let { (_, l, v) -> Assignment(l.toLong(), v.toLong()) }
     }
 }
+
+private fun bitCombos(n: Int) = (0 until (1 shl n)).map { it.toString(2).padStart(n, '0').toCharArray() }
