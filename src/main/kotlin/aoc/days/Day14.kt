@@ -49,7 +49,7 @@ private sealed class Instruction {
             val base = (assignment.location or baseMask).toString(2).padStart(36, '0')
             return bitCombos(floaters.size).map { bits ->
                 val baseArray = base.toCharArray()
-                floaters.forEachIndexed { i, f -> baseArray[f] = bits[i] }
+                floaters.zip(bits.toTypedArray()).forEach { (f, b) -> baseArray[f] = b }
                 Assignment(String(baseArray).toLong(2), assignment.value)
             }
         }
