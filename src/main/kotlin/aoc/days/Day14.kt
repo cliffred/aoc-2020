@@ -7,8 +7,8 @@ fun main() {
 }
 
 class Day14 : Day() {
-    private val instructionsV1 = input().map { Instruction.v1(it) }.toList()
-    private val instructionsV2 = input().map { Instruction.v2(it) }.toList()
+    private val instructionsV1 = input().map { Instruction.from(it, Instruction::MaskV1) }.toList()
+    private val instructionsV2 = input().map { Instruction.from(it, Instruction::MaskV2) }.toList()
 
     override fun part1() = runInstructions(instructionsV1).values.sum()
 
@@ -59,13 +59,12 @@ private sealed class Instruction {
 
     companion object {
         private val memPattern =
-            """mem\[(\d+)] = (\d+)""".toRegex()
+            """mem\[(\d+)]""".toRegex()
 
-        fun v1(instr: String) = if (instr.startsWith("mask")) MaskV1(instr.drop(7)) else parseAssignment(instr)
-        fun v2(instr: String) = if (instr.startsWith("mask")) MaskV2(instr.drop(7)) else parseAssignment(instr)
+        fun from(instr: String, mask: (String) -> Mask) = instr.split(" = ")
+            .let { (key, value) -> if (key == "mask") mask(value) else Assignment(parseMemKey(key), value.toLong()) }
 
-        private fun parseAssignment(instr: String) =
-            memPattern.matchEntire(instr)!!.groupValues.let { (_, l, v) -> Assignment(l.toLong(), v.toLong()) }
+        private fun parseMemKey(key: String) = memPattern.matchEntire(key)!!.groupValues[1].toLong()
     }
 }
 
