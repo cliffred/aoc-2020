@@ -33,23 +33,21 @@ class Day16 : Day() {
         this.nearbyTickets = nearbyTickets
     }
 
-    override fun part1(): Long {
-        val allRanges = fields.flatMap { sequenceOf(it.rangeA, it.rangeB) }
-        return nearbyTickets.flatMap { it.filterNot { num -> allRanges.any { range -> num in range } } }.sum()
-    }
+    override fun part1() =
+        nearbyTickets.flatMap { it.filterNot { num -> fields.any { field -> field.isValid(num) } } }.sum()
 
     override fun part2(): Long {
-        val allRanges = fields.flatMap { sequenceOf(it.rangeA, it.rangeB) }
-        val validTickets = nearbyTickets.filter { it.all { num -> allRanges.any { range -> num in range } } }
-        val orderedFields = findFieldOrder(validTickets, fields)
-        return myTicket.zip(orderedFields)
-            .filter { it.second.name.startsWith("departure") }
-            .map { it.first }
+        val validTickets = nearbyTickets.filter { it.all { num -> fields.any { field -> field.isValid(num) } } }
+        return findFieldsInOrder(validTickets, fields).zip(myTicket)
+            .filter { it.first.name.startsWith("departure") }
+            .map { it.second }
             .reduce { a, b -> a * b }
     }
 }
 
 private data class Field(val name: String, val rangeA: IntRange, val rangeB: IntRange) {
+    fun isValid(num: Long) = num in rangeA || num in rangeB
+
     companion object {
         val fieldPattern = Regex("""(.*): (\d+)-(\d+) or (\d+)-(\d+)""")
 
@@ -63,15 +61,13 @@ private data class Field(val name: String, val rangeA: IntRange, val rangeB: Int
     }
 }
 
-private fun findFieldOrder(validTickets: List<Ticket>, fields: List<Field>): Array<Field> {
+private fun findFieldsInOrder(validTickets: List<Ticket>, fields: List<Field>): Array<Field> {
     val possibleFields = (fields.indices).map { fields.toMutableSet() }
 
     validTickets.forEach { ticket ->
-        ticket.withIndex()
-            .forEach { (idx, num) ->
-                fields.filterNot { field -> num in field.rangeA || num in field.rangeB }
-                    .forEach { field -> possibleFields[idx].remove(field) }
-            }
+        ticket.withIndex().forEach { (i, num) ->
+            fields.filterNot { it.isValid(num) }.forEach { field -> possibleFields[i].remove(field) }
+        }
     }
 
     while (possibleFields.any { it.size > 1 }) {
