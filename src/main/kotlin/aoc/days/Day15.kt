@@ -7,9 +7,11 @@ fun main() {
 }
 
 class Day15 : Day() {
-    override fun part1() = numberSpoken(listOf(14, 8, 16, 0, 1, 17), 2020).toLong()
+    private val startingNumbers = input().first().split(',').map { it.toInt() }
 
-    override fun part2() = numberSpoken(listOf(14, 8, 16, 0, 1, 17), 30_000_000).toLong()
+    override fun part1() = numberSpoken(startingNumbers, 2020).toLong()
+
+    override fun part2() = numberSpoken(startingNumbers, 30_000_000).toLong()
 }
 
 fun numberSpoken(startingNumbers: List<Int>, endTurn: Int): Int {
