@@ -10,38 +10,45 @@ class Day17 : Day() {
     private val inputList = input().toList()
 
     override fun part1(): Long {
-        val grid3D = Grid3D()
+        val grid3D = Grid(3)
         inputList.forEachIndexed { y, row ->
-            row.withIndex().filter { it.value == '#' }.forEach { grid3D.activate(Point(it.index, -y, 0)) }
+            row.withIndex().filter { it.value == '#' }.forEach { grid3D.activate(listOf(it.index, -y, 0)) }
         }
         return runCycles(grid3D, 6).getActive().size.toLong()
     }
 
-    override fun part2() = TODO()
+    override fun part2(): Long {
+        val grid4D = Grid(4)
+        inputList.forEachIndexed { y, row ->
+            row.withIndex().filter { it.value == '#' }.forEach { grid4D.activate(listOf(it.index, -y, 0, 0)) }
+        }
+        return runCycles(grid4D, 6).getActive().size.toLong()
+    }
 }
 
-private fun runCycles(grid3D: Grid3D, i: Int): Grid3D {
-    var currentGrid3D = grid3D
+private fun runCycles(grid: Grid, i: Int): Grid {
+    var currentGrid = grid
     repeat(i) {
-        val nextGrid3D = Grid3D()
-        currentGrid3D.forEach { point ->
-            val activeNeighors = currentGrid3D.getActiveNeighbors(point).size
-            val active = currentGrid3D.isActive(point)
+        val nextGrid = Grid(grid.dimensions)
+        currentGrid.forEach { point ->
+            val activeNeighors = currentGrid.getActiveNeighbors(point).size
+            val active = currentGrid.isActive(point)
             if ((active && (activeNeighors == 2 || activeNeighors == 3)) || (!active && activeNeighors == 3)) {
-                nextGrid3D.activate(point)
+                nextGrid.activate(point)
             }
         }
-        currentGrid3D = nextGrid3D
+        currentGrid = nextGrid
     }
-    return currentGrid3D
+    return currentGrid
 }
 
-private class Grid3D : Iterable<Point> {
+private class Grid(val dimensions: Int) : Iterable<Point> {
     private val active = hashSetOf<Point>()
 
     fun isActive(point: Point) = point in active
 
     fun activate(point: Point) {
+        require(point.size == dimensions)
         active += point
     }
 
@@ -50,46 +57,47 @@ private class Grid3D : Iterable<Point> {
     fun getActive(): Set<Point> = active
 
     fun getNeighbors(point: Point): Set<Point> =
-        (-1..1).flatMap { a ->
-            (-1..1).flatMap { b ->
-                (-1..1).map { c ->
-                    val (x, y, z) = point
-                    Point(x + a, y + b, z + c)
-                }
+        cartesianProduct(-1..1, dimensions).map { diff ->
+            val neighbor = mutableListOf<Int>()
+            point.zip(diff).forEach { (p, d) ->
+                neighbor += p + d
             }
+            neighbor
         }.toMutableSet().apply { remove(point) }
 
     override fun iterator(): Iterator<Point> {
-        var minX = Int.MAX_VALUE
-        var minY = Int.MAX_VALUE
-        var minZ = Int.MAX_VALUE
-        var maxX = Int.MIN_VALUE
-        var maxY = Int.MIN_VALUE
-        var maxZ = Int.MIN_VALUE
-        active.forEach {
-            minX = if (it.x < minX) it.x else minX
-            minY = if (it.y < minY) it.y else minY
-            minZ = if (it.z < minZ) it.z else minZ
-            maxX = if (it.x > maxX) it.x else maxX
-            maxY = if (it.y > maxY) it.y else maxY
-            maxZ = if (it.z > maxZ) it.z else maxZ
-        }
-        minX--
-        minY--
-        minZ--
-        maxX++
-        maxY++
-        maxZ++
-        return iterator {
-            (minX..maxX).forEach { x ->
-                (minY..maxY).forEach { y ->
-                    (minZ..maxZ).forEach { z ->
-                        yield(Point(x, y, z))
-                    }
-                }
+        val min = Array(dimensions) { Int.MAX_VALUE }
+        val max = Array(dimensions) { Int.MIN_VALUE }
+        active.forEach { point ->
+            point.zip(min).withIndex().forEach {
+                min[it.index] = if (it.value.first < it.value.second) it.value.first else it.value.second
             }
+            point.zip(max).withIndex().forEach {
+                max[it.index] = if (it.value.first > it.value.second) it.value.first else it.value.second
+            }
+        }
+        min.forEachIndexed { index, i -> min[index] = i - 1 }
+        max.forEachIndexed { index, i -> max[index] = i + 1 }
+        return iterator {
+            min.zip(max).map { (it.first..it.second).toList() }
+                .let { cartesianProduct(it).forEach { point -> yield(point) } }
         }
     }
 }
 
-private data class Point(val x: Int, val y: Int, val z: Int)
+typealias Point = List<Int>
+
+private fun <T> cartesianProduct(lists: List<List<T>>): Set<List<T>> =
+    lists.fold(listOf(listOf<T>())) { acc, values ->
+        acc.flatMap { list -> values.map { value -> list + value } }
+    }.toSet()
+
+private fun <T> cartesianProduct(list: List<T>, repeat: Int): Set<List<T>> =
+    mutableListOf(list).let { allLists ->
+        repeat(repeat - 1) {
+            allLists += list
+        }
+        cartesianProduct(allLists)
+    }
+
+private fun cartesianProduct(range: IntRange, repeat: Int) = cartesianProduct(range.toList(), repeat)
